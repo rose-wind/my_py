@@ -13,6 +13,7 @@ class DataVisualzation(CoronaVirusSpider):
 
     def Create_Barchart(self):   #构建最近一天全国疫情情况的基本柱状图
         super().Load('data/lastday_corona_virus_of_china.json')
+        
 
 
 
