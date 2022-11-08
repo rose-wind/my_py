@@ -70,9 +70,9 @@ class CoronaVirusSpider(object):
         self.Crawl_coronavirus_of_china()
         self.Crawl_lastday_china_coronavirus()
 
-# if __name__ == '__main__':
-#     spyder=CoronaVirusSpider()
-#     spyder.Run()
+if __name__ == '__main__':
+    spyder=CoronaVirusSpider()
+    spyder.Run()
 
 
 
