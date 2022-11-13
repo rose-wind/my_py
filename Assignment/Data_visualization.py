@@ -140,6 +140,35 @@ class DataVisualzation(CoronaVirusSpider):
         )
         timeline.render('全国疫情变化.html')   #生成图表的.html文件
 
+    def Search_map(self):
+        provincename = input("请输入想要查询的省名")
+        data_str = super().Load('data/lastday_corona_virus_of_china.json')
+        provincedata = []
+        for province in data_str:
+            if province['provinceShortName'] == provincename:
+                for city in province['cities']:
+                    cityname = city['cityName']+'市'
+                    confirmedCount = city['confirmedCount']
+                    provincedata.append((cityname, confirmedCount))
+        province_map = Map()
+        province_map.add('当前确诊', provincedata, provincename)
+        province_map.set_global_opts(
+            title_opts=TitleOpts(title='当前确诊'),  # 设置图表名
+            visualmap_opts=VisualMapOpts(
+                is_show=True,
+                is_piecewise=True,  # 分段显示
+                pieces=[  # 标识列表
+                    {"min": 1, "max": 49, "lable": "1-49人", "color": "#CCFFFF"},
+                    {"min": 50, "max": 99, "lable": "10-99人", "color": "#FFFF99"},
+                    {"min": 100, "max": 499, "lable": "100-499人", "color": "#FF9966"},
+                    {"min": 500, "max": 999, "lable": "500-999人", "color": "#FF6666"},
+                    {"min": 1000, "max": 9999, "lable": "1000-9999人", "color": "#CC3333"},
+                    {"min": 10000, "lable": "10000+人", "color": "#990033"},
+                ]
+            )
+        )
+        province_map.render(f"data/province/{provincename}.html")
+
     def Runs(self):     #调用成员函数测试
         # self.Create_Barchart()
         # self.Create_china_map()
