@@ -23,6 +23,10 @@ from pyecharts.charts import Map   #地图库
 from tqdm import tqdm    #进度条库
 
 class DataVisualzation(CoronaVirusSpider):
+    def __init__(self):
+        super().__init__()
+        super().Run()
+
     def Create_Barchart(self):   #构建全国疫情情况的基本柱状图
         lastday_corona_virus_of_china=super().Load('data/lastday_corona_virus_of_china.json')  #加载数据
         x_axis=[]  #x轴坐标，为省份
@@ -45,7 +49,7 @@ class DataVisualzation(CoronaVirusSpider):
             data_list.append((provinceName, confirmedCount))
         return data_list
 
-    def Create_Map(self,title,data_list):    #构建全国疫情地图
+    def Create_Map(self,title,data_list): #构建全国疫情地图
         map=Map()
         map.add("确诊人数",data_list,"china",is_map_symbol_show=False)    #不显示定位点
         map.set_global_opts(
