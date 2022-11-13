@@ -66,7 +66,8 @@ class DataVisualzation(CoronaVirusSpider):
         return map
 
     def Create_china_map(self):
-        data_list=self.Parse_data('data/lastday_corona_virus_of_china.json','provinceShortName','confirmedCount')
+        data_str=super().Load('data/lastday_corona_virus_of_china.json')
+        data_list=self.Parse_data(data_str,'provinceShortName','confirmedCount')
         map=self.Create_Map('全国疫情地图',data_list)
         map.render("全国疫情地图.html")
 
@@ -139,11 +140,12 @@ class DataVisualzation(CoronaVirusSpider):
         )
         timeline.render('全国疫情变化.html')   #生成图表的.html文件
 
-    def Runs(self):     #调用成员函数
-        self.Create_Barchart()
-        self.Create_china_map()
-        self.Create_World_Map()
-        self.Timeline_Map()
+    def Runs(self):     #调用成员函数测试
+        # self.Create_Barchart()
+        # self.Create_china_map()
+        # self.Create_World_Map()
+        # self.Timeline_Map()
+        self.Search_map()
 
 if __name__ == '__main__':
     a=DataVisualzation()
