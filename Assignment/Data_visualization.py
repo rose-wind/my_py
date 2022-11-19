@@ -16,30 +16,36 @@
 
 from pyecharts.charts import Bar     #柱状图库
 from pyecharts import options as opts    #图表设置库
-from pyecharts.options import *
+from pyecharts.options import *      #图表设置选项
 from pyecharts.charts import Timeline    #时间线库
 from corona_virus_situation import CoronaVirusSpider   #数据分析库
 from pyecharts.charts import Map   #地图库
 from tqdm import tqdm    #进度条库
 
 class DataVisualzation(CoronaVirusSpider):
-    def __init__(self):
-        super().__init__()
-        super().Run()
+    # def __init__(self):
+    #     super().__init__()
+    #     super().Run()
 
     def Create_Barchart(self):   #构建全国疫情情况的基本柱状图
         lastday_corona_virus_of_china=super().Load('data/lastday_corona_virus_of_china.json')  #加载数据
         x_axis=[]  #x轴坐标，为省份
         y_axis=[]  #y轴坐标，为当前累计确诊人数
+        data=[]
         for province in lastday_corona_virus_of_china:
-            if province['provinceShortName']!='台湾' and province['provinceShortName']!='香港': #台湾和香港的数量远大于我国其他省，为了做图暂不统计
-                x_axis.append(province['provinceShortName'])   #将省级行政区的简称添加到x轴坐标的列表中
-                y_axis.append(province['confirmedCount'])      #将各省累计确诊人数添加到x轴坐标的列表中
-        bar=Bar(init_opts=opts.InitOpts(width='500px',height='500px'))    #设置图标长宽
-        bar.add_xaxis(x_axis)
-        bar.add_yaxis('当前累计确诊人数',y_axis,label_opts=LabelOpts(position='right'))   #将数组显示在柱状图的右边
+            if province['provinceShortName']!='台湾' and province['provinceShortName']!='香港': #台湾和香港的数据过于庞大，为了做图暂不统计
+                x=province['provinceShortName']
+                y=province['confirmedCount']
+                data.append((x,y))
+        data.sort(key=lambda tup: tup[1])   #对数据进行排序
+        for xy in data:
+            x_axis.append(xy[0])
+            y_axis.append(xy[1])
+        bar=Bar(init_opts=opts.InitOpts(width='500px',height='500px'))    #设置图表长宽
+        bar.add_xaxis(x_axis).set_global_opts(yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(font_size=9)))
+        bar.add_yaxis('当前累计确诊人数',y_axis,label_opts=LabelOpts(position='right',font_size=12))  #将数组显示在柱状图的右边
         bar.reversal_axis()    #反转x轴y轴
-        bar.render('最近一天全国各省疫情情况柱状图.html')  #设置标题，生成图表的html文件
+        bar.render('全国各省疫情情况柱状图.html')  #设置标题，生成图表的html文件
 
     def Parse_data(self,data_str,key_1,key_2):
         data_list = []      #定义数据列表
@@ -51,7 +57,7 @@ class DataVisualzation(CoronaVirusSpider):
 
     def Create_Map(self,title,data_list): #构建全国疫情地图
         map=Map()
-        map.add("确诊人数",data_list,"china",is_map_symbol_show=False)    #不显示定位点
+        map.add("累计确诊人数",data_list,"china",is_map_symbol_show=False)    #不显示定位点
         map.set_global_opts(
             title_opts=TitleOpts(title=title),    #设置图表名
             visualmap_opts=VisualMapOpts(
@@ -62,8 +68,10 @@ class DataVisualzation(CoronaVirusSpider):
                     {"min": 100, "max": 999, "lable": "100-999人", "color": "#FFFF99"},
                     {"min": 1000, "max": 4999, "lable": "1000-4999人", "color": "#FF9966"},
                     {"min": 5000, "max": 9999, "lable": "5000-9999人", "color": "#FF6666"},
-                    {"min": 10000, "max": 99999, "lable": "10000-99999人", "color": "#CC3333"},
-                    {"min": 100000, "lable": "100000+人", "color": "#990033"},
+                    {"min": 10000, "max": 49999, "lable": "10000-49999人", "color": "#CC5959"},
+                    {"min": 50000, "max": 99999, "lable": "50000-99999人", "color": "#CC3333"},
+                    {"min": 100000,"max":149999, "lable": "100000-159999人", "color": "#992626"},
+                    {"min": 150000,"lable":"150000+人","color":"#730026"}
                 ]
             )
         )
@@ -75,7 +83,7 @@ class DataVisualzation(CoronaVirusSpider):
         map=self.Create_Map('全国疫情地图',data_list)
         map.render("全国疫情地图.html")
 
-    def Create_World_Map(self):
+    def Create_World_Map(self):                #构建世界疫情地图
         world_data_str=super().Load('data/lastday_coronavirus.json')    #装载数据
         world_data_list=[]
         country_name_dict=super().Load('data/country.json')     #加载国家中英文名对照表
@@ -139,19 +147,22 @@ class DataVisualzation(CoronaVirusSpider):
         timeline.add_schema(
             play_interval=500,      #自动播放的时间间隔
             is_timeline_show=True,    #是否显示时间线
-            is_auto_play=True,   #是否自动播放
+            is_auto_play=False,   #是否自动播放
             is_loop_play=True   #是否循环播放
         )
         timeline.render('全国疫情变化.html')   #生成图表的.html文件
 
-    def Search_map(self):
+    def Search_map(self):      #搜索各省的疫情地图
         provincename = input("请输入想要查询的省名")
         data_str = super().Load('data/lastday_corona_virus_of_china.json')
         provincedata = []
         for province in data_str:
             if province['provinceShortName'] == provincename:
                 for city in province['cities']:
-                    cityname = city['cityName']+'市'
+                    if city['cityName']=='大兴安岭':
+                        cityname=city['cityName']+'地区'
+                    else:
+                        cityname = city['cityName']+'市'
                     confirmedCount = city['confirmedCount']
                     provincedata.append((cityname, confirmedCount))
         province_map = Map()
@@ -174,11 +185,11 @@ class DataVisualzation(CoronaVirusSpider):
         province_map.render(f"data/province/{provincename}.html")
 
     def Runs(self):     #调用成员函数测试
-        # self.Create_Barchart()
-        # self.Create_china_map()
-        # self.Create_World_Map()
-        # self.Timeline_Map()
-        self.Search_map()
+        self.Create_Barchart()
+        self.Create_china_map()
+        self.Create_World_Map()
+        self.Timeline_Map()
+        # self.Search_map()
 
 if __name__ == '__main__':
     a=DataVisualzation()
