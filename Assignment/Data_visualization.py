@@ -156,40 +156,53 @@ class DataVisualzation(CoronaVirusSpider):
         provincename = input("请输入想要查询的省名")
         data_str = super().Load('data/lastday_corona_virus_of_china.json')
         provincedata = []
-        for province in data_str:
-            if province['provinceShortName'] == provincename:
-                for city in province['cities']:
-                    if city['cityName']=='大兴安岭':
-                        cityname=city['cityName']+'地区'
-                    else:
-                        cityname = city['cityName']+'市'
-                    confirmedCount = city['confirmedCount']
-                    provincedata.append((cityname, confirmedCount))
-        province_map = Map()
-        province_map.add('当前确诊', provincedata, provincename)
-        province_map.set_global_opts(
-            title_opts=TitleOpts(title='当前确诊'),  # 设置图表名
-            visualmap_opts=VisualMapOpts(
-                is_show=True,
-                is_piecewise=True,  # 分段显示
-                pieces=[  # 标识列表
-                    {"min": 1, "max": 49, "lable": "1-49人", "color": "#CCFFFF"},
-                    {"min": 50, "max": 99, "lable": "10-99人", "color": "#FFFF99"},
-                    {"min": 100, "max": 499, "lable": "100-499人", "color": "#FF9966"},
-                    {"min": 500, "max": 999, "lable": "500-999人", "color": "#FF6666"},
-                    {"min": 1000, "max": 9999, "lable": "1000-9999人", "color": "#CC3333"},
-                    {"min": 10000, "lable": "10000+人", "color": "#990033"},
-                ]
+        if provincename!="台湾" and provincename!="香港" and provincename!="澳门":
+            for province in data_str:
+                if province['provinceShortName'] == provincename:
+                    print(f"累计确诊人数：{province['confirmedCount']}")
+                    print(f"治愈人数：{province['curedCount']}")
+                    print(f"死亡人数：{province['deadCount']}")
+                    for city in province['cities']:
+                        if "大兴安岭" in city['cityName']:
+                            cityname=city['cityName']+"地区"
+                        elif "自治" in city['cityName']:
+                            cityname=city['cityName']
+                        elif "县" in city['cityName']:
+                            cityname=city['cityName']
+                        elif "区" in city['cityName']:
+                            cityname=city['cityName']
+                        else:
+                            cityname = city['cityName']+'市'
+                        confirmedCount = city['confirmedCount']
+                        provincedata.append((cityname, confirmedCount))
+            province_map = Map()
+            province_map.add('当前确诊', provincedata, provincename)
+            province_map.set_global_opts(
+                title_opts=TitleOpts(title='当前确诊'),  # 设置图表名
+                visualmap_opts=VisualMapOpts(
+                    is_show=True,
+                    is_piecewise=True,  # 分段显示
+                    pieces=[  # 标识列表
+                        {"min": 1, "max": 49, "lable": "1-49人", "color": "#CCFFFF"},
+                        {"min": 50, "max": 99, "lable": "10-99人", "color": "#FFFF99"},
+                        {"min": 100, "max": 499, "lable": "100-499人", "color": "#FF9966"},
+                        {"min": 500, "max": 999, "lable": "500-999人", "color": "#FF6666"},
+                        {"min": 1000, "max": 9999, "lable": "1000-9999人", "color": "#CC3333"},
+                        {"min": 10000, "lable": "10000+人", "color": "#990033"},
+                    ]
+                )
             )
-        )
-        province_map.render(f"data/province/{provincename}.html")
+            province_map.render(f"data/province/{provincename}.html")
+        else:
+            print("缺少疫情信息。")
+
 
     def Runs(self):     #调用成员函数测试
-        self.Create_Barchart()
-        self.Create_china_map()
-        self.Create_World_Map()
-        self.Timeline_Map()
-        # self.Search_map()
+        # self.Create_Barchart()
+        # self.Create_china_map()
+        # self.Create_World_Map()
+        # self.Timeline_Map()
+        self.Search_map()
 
 if __name__ == '__main__':
     a=DataVisualzation()
