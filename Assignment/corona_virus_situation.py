@@ -44,15 +44,15 @@ class CoronaVirusSpider(object):
         with open(path,'w',encoding='utf8') as fp:
             json.dump(data,fp,ensure_ascii=False)
 
-    def Crawl_lastday_coronavirus(self):    #获取最近一日各国疫情数据
-        home_page=self.Get_coronavirus_home_page(self.home_url)   #请求主页，获取信息
-        lastday_coronavirus=self.Parse_home(home_page,'getListByCountryTypeService2true')   #解析主页数据
-        self.Save(lastday_coronavirus,'data/lastday_coronavirus.json')
+    # def Crawl_lastday_coronavirus(self):    #获取最近一日各国疫情数据
+    #     home_page=self.Get_coronavirus_home_page(self.home_url)   #请求主页，获取信息
+    #     lastday_coronavirus=self.Parse_home(home_page,'getListByCountryTypeService2true')   #解析主页数据
+    #     self.Save(lastday_coronavirus,'data/lastday_coronavirus.json')
 
-    def Crawl_coronavirus(self):             #采集2020年1月23日以来的各个国家疫情数据
-        lastday_global_coronavirus=self.Load('data/lastday_coronavirus.json')
-        corona_virus = self.Parse_corona_virus(lastday_global_coronavirus,desc='采集2020年1月23日以来的各个国家疫情数据')
-        self.Save(corona_virus,'data/corona_virus.json')
+    # def Crawl_coronavirus(self):             #采集2020年1月23日以来的各个国家疫情数据
+    #     lastday_global_coronavirus=self.Load('data/lastday_coronavirus.json')
+    #     corona_virus = self.Parse_corona_virus(lastday_global_coronavirus,desc='采集2020年1月23日以来的各个国家疫情数据')
+    #     self.Save(corona_virus,'data/corona_virus.json')
 
     def Crawl_lastday_china_coronavirus(self):            #采集最近一日全国各省疫情数据
         home_page=self.Get_coronavirus_home_page(self.home_url)
@@ -65,8 +65,8 @@ class CoronaVirusSpider(object):
         self.Save(corona_virus,'data/corona_virus_of_china.json')
 
     def Run(self):   #运行
-        self.Crawl_coronavirus()
-        self.Crawl_lastday_coronavirus()
+        # self.Crawl_coronavirus()
+        # self.Crawl_lastday_coronavirus()
         self.Crawl_coronavirus_of_china()
         self.Crawl_lastday_china_coronavirus()
 

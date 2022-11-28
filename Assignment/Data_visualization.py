@@ -153,7 +153,7 @@ class DataVisualzation(CoronaVirusSpider):
         timeline.render('全国疫情变化.html')   #生成图表的.html文件
 
     def Search_map(self):      #搜索各省的疫情地图
-        provincename = input("请输入想要查询的省名")
+        provincename = input("请输入想要查询的省名：")
         data_str = super().Load('data/lastday_corona_virus_of_china.json')
         provincedata = []
         if provincename!="台湾" and provincename!="香港" and provincename!="澳门":
