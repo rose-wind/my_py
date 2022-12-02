@@ -1,21 +1,4 @@
 #-*-coding:utf-8-*-
-
-"""
-各省数据json串格式：
-{"provinceName": "台湾", "provinceShortName": "台湾", "currentConfirmedCount": 7860598, "confirmedCount": 7887538,
- "suspectedCount": 485, "curedCount": 13742, "deadCount": 13198, "comment": "", "locationId": 710000,
- "statisticsData": "https://file1.dxycdn.com/2020/0223/045/3398299749526003760-135.json", "highDangerCount": 0,
- "midDangerCount": 0, "detectOrgCount": 0, "vaccinationOrgCount": 0, "cities": [], "dangerAreas": []}
-"""
-
-"""
-各国数据json串格式：
-{"id": 22652737, "createTime": 1667903964000, "modifyTime": 1667903964000, "tags": "", "countryType": 2, "continents": "欧洲", "provinceId": "5", "provinceName": "法国", "provinceShortName": "", "cityName": "", "currentConfirmedCount": 36457019, "confirmedCount": 36982388, "confirmedCountRank": 3, "suspectedCount": 0, "curedCount": 368023, "deadCount": 157346, "deadCountRank": 10, "deadRate": "0.42", "deadRateRank": 169, "comment": "", "sort": 0, "operator": "sunyanna", "locationId": 961002, "countryShortCode": "FRA", "countryFullName": "France", "statisticsData": "https://file1.dxycdn.com/2020/0315/929/3402160538577857318-135.json", "incrVo": {"currentConfirmedIncr": 0, "confirmedIncr": 0, "curedIncr": 0, "deadIncr": 0}, "showRank": true, "yesterdayConfirmedCount": 2147383647, "yesterdayLocalConfirmedCount": 2147383647, "yesterdayOtherConfirmedCount": 2147383647, "yesterdayAsymptomaticCount": 2147383647, "highDanger": "", "midDanger": "", "highInDesc": "", "lowInDesc": "", "outDesc": ""}
- """
-
-
-from pyecharts.charts import Bar     #柱状图库
-from pyecharts import options as opts    #图表设置库
 from pyecharts.options import *      #图表设置选项
 from pyecharts.charts import Timeline    #时间线库
 from corona_virus_situation import CoronaVirusSpider   #数据分析库
@@ -23,29 +6,9 @@ from pyecharts.charts import Map   #地图库
 from tqdm import tqdm    #进度条库
 
 class DataVisualzation(CoronaVirusSpider):
-    # def __init__(self):
-    #     super().__init__()
-    #     super().Run()
-
-    def Create_Barchart(self):   #构建全国疫情情况的基本柱状图
-        lastday_corona_virus_of_china=super().Load('data/lastday_corona_virus_of_china.json')  #加载数据
-        x_axis=[]  #x轴坐标，为省份
-        y_axis=[]  #y轴坐标，为当前累计确诊人数
-        data=[]
-        for province in lastday_corona_virus_of_china:
-            if province['provinceShortName']!='台湾' and province['provinceShortName']!='香港': #台湾和香港的数据过于庞大，为了做图暂不统计
-                x=province['provinceShortName']
-                y=province['confirmedCount']
-                data.append((x,y))
-        data.sort(key=lambda tup: tup[1])   #对数据进行排序
-        for xy in data:
-            x_axis.append(xy[0])
-            y_axis.append(xy[1])
-        bar=Bar(init_opts=opts.InitOpts(width='500px',height='500px'))    #设置图表长宽
-        bar.add_xaxis(x_axis).set_global_opts(yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(font_size=9)))
-        bar.add_yaxis('当前累计确诊人数',y_axis,label_opts=LabelOpts(position='right',font_size=12))  #将数组显示在柱状图的右边
-        bar.reversal_axis()    #反转x轴y轴
-        bar.render('全国各省疫情情况柱状图.html')  #设置标题，生成图表的html文件
+    def __init__(self):
+        super().__init__()
+        super().Run()
 
     def Parse_data(self,data_str,key_1,key_2):
         data_list = []      #定义数据列表
@@ -81,39 +44,6 @@ class DataVisualzation(CoronaVirusSpider):
         data_str=super().Load('data/lastday_corona_virus_of_china.json')
         data_list=self.Parse_data(data_str,'provinceShortName','confirmedCount')
         map=self.Create_Map('全国疫情地图',data_list)
-        map.render("全国疫情地图.html")
-
-    def Create_World_Map(self):                #构建世界疫情地图
-        world_data_str=super().Load('data/lastday_coronavirus.json')    #装载数据
-        world_data_list=[]
-        country_name_dict=super().Load('data/country.json')     #加载国家中英文名对照表
-        new_country_name_dict={value:key for key, value in country_name_dict.items()}   #交换对照表中value和key的值
-        for country in world_data_str:                   #将数据串中的所有中文国家名转换为英文国家名，与累计确诊数据压缩成元组添加到数据列表中
-            country_name=new_country_name_dict.get(country['provinceName'])
-            country_current_confirmed_count=country['confirmedCount']
-            world_data_list.append((country_name,country_current_confirmed_count))
-        pieces = [
-            {"min": 0,"max":99 ,"label": "0-99人", "color": "#FFFFFF"},
-            {"min": 100, "max": 9999, "label": "100-9999人", "color": "#FFEBCD"},
-            {"min": 1000, "max": 49999, "label": "1000-99999人", "color": "#FFA07A"},
-            {"min": 50000, "max": 99999, "label": "50000-99999人", "color": "#FF7F50"},
-            {"min": 100000, "max": 999999, "label": "100000-999999人", "color": "#CD4F39"},
-            {'min': 1000000, "max": 9999999, "label": "1000000-99999999人", "color": "#CD3333"},
-            {'min': 10000000, "label": ">10000000人", "color": "#8B0000"}  # 不指定 max，表示 max 为无限大
-        ]
-        map1 = Map()
-        map1.set_global_opts(
-            title_opts=opts.TitleOpts(title='全球疫情状况', pos_right='right'),
-            visualmap_opts=opts.VisualMapOpts(
-                is_piecewise=True,  #设置为分段显示
-                #自定义每一段的范围，以及每一段的文字，每一段特别的样式
-                pieces=pieces
-            )
-        )
-        map1.set_series_opts(label_opts=opts.LabelOpts(is_show=False))
-        map1.add('现存确诊人数',world_data_list, maptype='world', is_map_symbol_show=False,
-                 label_opts=opts.LabelOpts(is_show=False))
-        map1.render("全球疫情地图.html")
 
     def Timeline_Map(self):
         corona_virus_of_china_list=super().Load('data/corona_virus_of_china.json')    #加载信息
@@ -196,17 +126,9 @@ class DataVisualzation(CoronaVirusSpider):
         else:
             print("缺少疫情信息。")
 
-
     def Runs(self):     #调用成员函数测试
-        # self.Create_Barchart()
-        # self.Create_china_map()
-        # self.Create_World_Map()
-        # self.Timeline_Map()
         self.Search_map()
 
 if __name__ == '__main__':
     a=DataVisualzation()
     a.Runs()
-
-
-
